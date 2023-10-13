@@ -25,9 +25,9 @@
 *****************************************************************************/
 namespace CS273 {
 
-/****************************************************************************
-* CircLinkedList defines a circular linked list as a list of nodes.
-*****************************************************************************/
+	/****************************************************************************
+	* CircLinkedList defines a circular linked list as a list of nodes.
+	*****************************************************************************/
 	template<class T>
 	class CircLinkedList {
 	private:
@@ -52,6 +52,12 @@ namespace CS273 {
 				}
 			}
 		};
+#pragma endregion
+
+		node* head;		// the "first" item in the list
+		node* tail;		// the "last" item in the list
+		int num_items;	// keeps track of the total number of items
+
 	public:
 #pragma region Iterator
 		/// <summary>
@@ -69,8 +75,74 @@ namespace CS273 {
 			/// data.
 			/// </summary>
 			friend class CircLinkedList<T>;
-		};
+		public:
+			iterator(CircLinkedList<T>* parent = nullptr, node* cur = nullptr) :
+				parent(parent), cur(cur) {}
 
+			///
+			/// Overloaded operators for advancing and for moving backwarts
+			/// 
+			iterator& operator++() {
+				cur = cur->next;
+				return *this;
+			}
+			iterator& operator--() {
+				cur = cur->prev;
+				return *this;
+			}
+
+			///
+			/// Overloaded dereferencing operator for treating an iterator like
+			/// a pointer
+			/// 
+			T& operator*() {
+				return cur->data;
+			}
+
+			///
+			/// Overloaded == and != to allow for comparing two iterators
+			/// 
+			bool operator==(const iterator& alt) {
+				return (cur == alt.cur);
+			}
+			bool operator!=(const iterator& alt) {
+				return cur != alt.cur;
+			}
+		};
+#pragma endregion
+
+		///
+		/// Constructor for the list
+		/// 
+		CircLinkedList<T>() : head(nullptr), tail(nullptr), num_items(0) {}
+
+#pragma region RuleOfThree
+		///
+		/// Recall: the Rule of Three requires that we define a destructor,
+		/// a copy constructor, and an overloaded assignment operator!
+		/// 
+		/// First, the destructor
+		virtual ~CircLinkedList<T>() {
+			//March through the list destroying the whole thing!
+			node* byebye = head;
+			while (byebye) {
+				node* forever = byebye;
+				byebye = byebye->next;
+				delete forever;
+			}
+		}
+		/// <summary>
+		/// The copy constructor makes a deep copy
+		/// </summary>
+		CircLinkedList<T>(const CircLinkedList<T>& alt) :
+			head(nullptr), tail(nullptr), num_items(0) {
+			
+			node* n = alt.head;
+			int items_copied = 0;
+			while (items_copied < alt.num_items) {
+				//TODO
+			}
+		}
 	};
-}
+};
 #endif
