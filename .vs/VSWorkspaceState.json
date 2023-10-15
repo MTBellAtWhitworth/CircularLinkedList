@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\CircularLinkedList",
+    "\\CircularLinkedList\\CircularLinkedList"
   ],
-  "SelectedNode": "\\CircularLinkedList.sln",
+  "SelectedNode": "\\CircularLinkedList\\CircularLinkedList\\CircularLinkedList.h",
   "PreviewInSolutionExplorer": false
 }

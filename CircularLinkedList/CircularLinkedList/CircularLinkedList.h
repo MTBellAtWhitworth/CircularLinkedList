@@ -15,6 +15,7 @@
 * Kent Jones and Wizard Dr. Ed Walker!
 *****************************************************************************/
 
+#include <stdexcept>
 
 #ifndef CLL_H
 #define CLL_H
@@ -35,8 +36,7 @@ namespace CS273 {
 		/// <summary>
 		/// class node defines the nodes of which this list consists
 		/// </summary>
-		class node {
-		public:
+		struct node {
 			node* next; // Pointer to the next node in the list
 			node* prev; // Pointer to the previous node in the list
 			T data;		// The actual data stored in this node
@@ -111,7 +111,6 @@ namespace CS273 {
 			}
 		};
 
-		friend class iterator;
 #pragma endregion
 
 		///
@@ -142,10 +141,14 @@ namespace CS273 {
 		/// 
 		
 		T& front() {
+			if (num_items == 0)
+				throw std::out_of_range("list empty");
 			return head->data;
 		}
 
 		T& back() {
+			if (num_items == 0)
+				throw std::out_of_range("list empty")
 			return tail->data;
 		}
 
@@ -189,6 +192,8 @@ namespace CS273 {
 		/// <param name="pos">pos is the point before which to insert</param>
 		/// <param name="value">value is a reference to what is inserted</param>
 		iterator insert(iterator pos, const T& value) {
+			//TODO: I suspect something might be wrong both here and in erase because IntelliSense is barfing.
+			// Gonna try again at my office when I can.
 			//Step 0: make a blank iterator to this. That way, we have something
 			//to return even in a worst case.
 			iterator it(this);
@@ -203,16 +208,16 @@ namespace CS273 {
 					elem = new node(value, pos->cur);
 
 					//Update front if we need to
-					if (pos->cur == front)
-						front = elem;
+					if (pos->cur == head)
+						head = elem;
 				}
 				else {
 					//We are in the special case!
 					elem = new node(value);
 					elem->next = elem;
 					elem->prev = elem;
-					front = elem;
-					back = elem;
+					head = elem;
+					tail = elem;
 				}
 				num_items++;
 				it->cur = elem;
@@ -235,12 +240,12 @@ namespace CS273 {
 			if (num_items > 0 && pos->parent == this) {
 				//It does, so delete away! First, check if we're deleting
 				//from the end and, if so, update back.
-				if (pos->cur == back)
-					back = pos->cur->prev;
-				//Second, check if we're deleting from th front and, if so,
+				if (pos->cur == tail)
+					tail = pos->cur->prev;
+				//Second, check if we're deleting from the front and, if so,
 				//update front.
-				if (pos->cur == front)
-					front = pos->cur->next;
+				if (pos->cur == head)
+					head = pos->cur->next;
 
 				//Now we can delete away!
 				node* byebye = pos->cur;
@@ -258,7 +263,6 @@ namespace CS273 {
 		/// </summary>
 		/// <param name="value">The item being inserted</param>
 		void push_back(const T& value) {
-			//TODO: Confirm this works for front and back as appropriate!
 			node* elem;
 			if (num_items > 0) {
 				elem = new node(T, head);
@@ -268,14 +272,18 @@ namespace CS273 {
 				elem = new node(T);
 				elem->next = elem;
 				elem->prev = elem;
-				front = elem;
+				head = elem;
 			}
 			num_items++;
-			back = elem;
+			tail = elem;
 		}
 
+		/// <summary>
+		/// Removes an element from the "back" of the list, causing the
+		/// previous element before it to point to the beginning.
+		/// </summary>
 		void pop_back() {
-			//TODO
+			//TODO. Right now is a stub
 		}
 
 		//TODO: Rest of the functionality
