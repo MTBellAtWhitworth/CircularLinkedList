@@ -33,9 +33,10 @@ namespace CS273 {
 	private:
 #pragma region NodeStruct
 		/// <summary>
-		/// struct node defines the nodes of which this list consists
+		/// class node defines the nodes of which this list consists
 		/// </summary>
-		struct node {
+		class node {
+		public:
 			node* next; // Pointer to the next node in the list
 			node* prev; // Pointer to the previous node in the list
 			T data;		// The actual data stored in this node
@@ -93,7 +94,7 @@ namespace CS273 {
 
 			///
 			/// Overloaded dereferencing operator for treating an iterator like
-			/// a pointer
+			/// a pointer.
 			/// 
 			T& operator*() {
 				return cur->data;
@@ -109,15 +110,179 @@ namespace CS273 {
 				return cur != alt.cur;
 			}
 		};
+
+		friend class iterator;
 #pragma endregion
 
 		///
 		/// Constructor for the list
 		/// 
 		CircLinkedList<T>() : head(nullptr), tail(nullptr), num_items(0) {}
+#pragma region StandardFunctionality
 
-#pragma region RuleOfThree
 		///
+		/// Linked lists of all sorts can be accessed in various ways. For this version, we
+		/// implement a subset of the interface for the STL linked list. A major different
+		/// is that, because this list is circular, it doesn't make sense to return an
+		/// iterator to end. 
+		/// 
+		/// Member methods to be implemented for this interface:
+		/// front (returns a reference to the data in the first element)
+		/// back (returns the data in the last element)
+		/// begin (returns an iterator to the first element)
+		/// empty (returns true if empty)
+		/// size (returns the number of elements)
+		/// clear (empties the list!)
+		/// insert (inserts before an element using an iterator to indicate where)
+		/// erase (opposite of insert!)
+		/// push_back (inserts at the end)
+		/// pop_back (removes from the end)
+		/// push_front (inserts at the beginning)
+		/// pop_front (removes from the beginning)
+		/// 
+		
+		T& front() {
+			return head->data;
+		}
+
+		T& back() {
+			return tail->data;
+		}
+
+		/// <summary>
+		/// begin returns an iterator to the beginning of the list, but...
+		/// </summary>
+		/// <returns>
+		/// This requires some explanation! Straightforward if the list has
+		/// elements, but, if it is empty, it returns an iterator that doesn't
+		/// point anywhere (so to nullptr)!
+		/// </returns>
+		iterator begin() {
+			iterator it(this, head);
+			return it;
+		}
+
+		bool empty() const {
+			return num_items == 0;
+		}
+
+		int size() const {
+			return num_items;
+		}
+
+		void clear() {
+			node* byebye = head;
+			for (int i = 0; i < num_items; ++i) {
+				node* forever = byebye;
+				byebye = byebye->next;
+				delete forever;
+			}
+			num_items = 0;
+		}
+
+		/// <summary>
+		/// Most of the time, insert is pretty straightforward, but, if the
+		/// list is empty, it has to treat the special case of insertion
+		/// at the beginning. Also, if the proposed location doesn't make
+		/// sense, e.g. isn't in this list, then don't insert.
+		/// </summary>
+		/// <param name="pos">pos is the point before which to insert</param>
+		/// <param name="value">value is a reference to what is inserted</param>
+		iterator insert(iterator pos, const T& value) {
+			//Step 0: make a blank iterator to this. That way, we have something
+			//to return even in a worst case.
+			iterator it(this);
+			
+			//First, make sure the insertion point makes sense!
+			if (pos->parent == this) {
+				//It makes sense, so get a node started...
+				node* elem = nullptr;
+				//Second, see if we're not in the special case of insertion at
+				//the beginning
+				if (!empty()) {
+					elem = new node(value, pos->cur);
+
+					//Update front if we need to
+					if (pos->cur == front)
+						front = elem;
+				}
+				else {
+					//We are in the special case!
+					elem = new node(value);
+					elem->next = elem;
+					elem->prev = elem;
+					front = elem;
+					back = elem;
+				}
+				num_items++;
+				it->cur = elem;
+			} 
+			// OK, insertion done. Return that iterator, which will be nonsense
+			// if the insertion point didn't make sense.
+			return it;
+		}
+
+		/// <summary>
+		/// For erase, we partly depart from the spirit of the STL's erase.
+		/// Ours isn't quite so sophisticated -- returns a void rather than
+		/// an iterator. Otherwise, much is the same as for insert.
+		/// WARNING: a side effect of this is that the iterator passed in
+		///		is now invalid!
+		/// </summary>
+		/// <param name="pos">The position from which to erase.</param>
+		void erase(iterator pos) {
+			//Check to make sure the position makes sense!
+			if (num_items > 0 && pos->parent == this) {
+				//It does, so delete away! First, check if we're deleting
+				//from the end and, if so, update back.
+				if (pos->cur == back)
+					back = pos->cur->prev;
+				//Second, check if we're deleting from th front and, if so,
+				//update front.
+				if (pos->cur == front)
+					front = pos->cur->next;
+
+				//Now we can delete away!
+				node* byebye = pos->cur;
+				byebye->next->prev = byebye->prev;
+				byebye->prev->next = byebye->next;
+				delete byebye;
+				num_items--;
+			}
+		}
+
+		/// <summary>
+		/// Puts an element at the "end" of the list, which should then
+		/// point to the beginning. In the special case where nothing is
+		/// in the list currently, should point to itself.
+		/// </summary>
+		/// <param name="value">The item being inserted</param>
+		void push_back(const T& value) {
+			//TODO: Confirm this works for front and back as appropriate!
+			node* elem;
+			if (num_items > 0) {
+				elem = new node(T, head);
+			}
+			else {
+				//We're in the special case of an empty list
+				elem = new node(T);
+				elem->next = elem;
+				elem->prev = elem;
+				front = elem;
+			}
+			num_items++;
+			back = elem;
+		}
+
+		void pop_back() {
+			//TODO
+		}
+
+		//TODO: Rest of the functionality
+
+#pragma endregion
+#pragma region RuleOfThree
+		///TODO:
 		/// Recall: the Rule of Three requires that we define a destructor,
 		/// a copy constructor, and an overloaded assignment operator!
 		/// 
