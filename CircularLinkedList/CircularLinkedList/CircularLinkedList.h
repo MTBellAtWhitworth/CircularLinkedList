@@ -7,7 +7,8 @@
 *	and sequential containers.
 * 
 * Author: Matthew Bell and CS273
-* Co-author: <TODO: PUT YOUR NAME HERE>
+* Co-authors: <TODO: PUT YOUR NAME HERE. YOU MAY WORK IN GROUPS OF TWO
+				IFF you come to Caleb or Prof. Bell for advice.>
 * 
 * Miscelleneous credits:
 * This example is loosely based on an earlier doubly linked list (non-circular)
@@ -48,8 +49,13 @@ namespace CS273 {
 				//If after isn't null, then we need to insert our new node in front
 				if (after != nullptr) {
 					next = after;
+					prev = after->prev;
 					after->prev->next = this;
 					after->prev = this;
+				}
+				else {
+					next = this;
+					prev = this;
 				}
 			}
 		};
@@ -84,12 +90,10 @@ namespace CS273 {
 			/// Overloaded operators for advancing and for moving backwarts
 			/// 
 			iterator& operator++() {
-				cur = cur->next;
-				return *this;
+				//TODO
 			}
 			iterator& operator--() {
-				cur = cur->prev;
-				return *this;
+				//TODO
 			}
 
 			///
@@ -135,9 +139,9 @@ namespace CS273 {
 		/// insert (inserts before an element using an iterator to indicate where)
 		/// erase (opposite of insert!)
 		/// push_back (inserts at the end)
-		/// pop_back (removes from the end)
-		/// push_front (inserts at the beginning)
-		/// pop_front (removes from the beginning)
+		/// pop_back (removes from the end) <== TODO You implement this
+		/// push_front (inserts at the beginning) <== TODO You implement this
+		/// pop_front (removes from the beginning) <== TODO You implement this
 		/// 
 		
 		T& front() {
@@ -148,7 +152,7 @@ namespace CS273 {
 
 		T& back() {
 			if (num_items == 0)
-				throw std::out_of_range("list empty")
+				throw std::out_of_range("list empty");
 			return tail->data;
 		}
 
@@ -192,23 +196,22 @@ namespace CS273 {
 		/// <param name="pos">pos is the point before which to insert</param>
 		/// <param name="value">value is a reference to what is inserted</param>
 		iterator insert(iterator pos, const T& value) {
-			//TODO: I suspect something might be wrong both here and in erase because IntelliSense is barfing.
-			// Gonna try again at my office when I can.
 			//Step 0: make a blank iterator to this. That way, we have something
-			//to return even in a worst case.
+			//to return even in a worst case. Note this means that a "broken"
+			//iterator will be returned.
 			iterator it(this);
 			
 			//First, make sure the insertion point makes sense!
-			if (pos->parent == this) {
+			if (pos.parent == this) {
 				//It makes sense, so get a node started...
 				node* elem = nullptr;
 				//Second, see if we're not in the special case of insertion at
 				//the beginning
 				if (!empty()) {
-					elem = new node(value, pos->cur);
+					elem = new node(value, pos.cur);
 
 					//Update front if we need to
-					if (pos->cur == head)
+					if (pos.cur == head)
 						head = elem;
 				}
 				else {
@@ -220,7 +223,7 @@ namespace CS273 {
 					tail = elem;
 				}
 				num_items++;
-				it->cur = elem;
+				it.cur = elem;
 			} 
 			// OK, insertion done. Return that iterator, which will be nonsense
 			// if the insertion point didn't make sense.
@@ -237,18 +240,18 @@ namespace CS273 {
 		/// <param name="pos">The position from which to erase.</param>
 		void erase(iterator pos) {
 			//Check to make sure the position makes sense!
-			if (num_items > 0 && pos->parent == this) {
+			if (num_items > 0 && pos.parent == this) {
 				//It does, so delete away! First, check if we're deleting
 				//from the end and, if so, update back.
-				if (pos->cur == tail)
-					tail = pos->cur->prev;
+				if (pos.cur == tail)
+					tail = pos.cur->prev;
 				//Second, check if we're deleting from the front and, if so,
 				//update front.
-				if (pos->cur == head)
-					head = pos->cur->next;
+				if (pos.cur == head)
+					head = pos.cur->next;
 
 				//Now we can delete away!
-				node* byebye = pos->cur;
+				node* byebye = pos.cur;
 				byebye->next->prev = byebye->prev;
 				byebye->prev->next = byebye->next;
 				delete byebye;
@@ -265,11 +268,11 @@ namespace CS273 {
 		void push_back(const T& value) {
 			node* elem;
 			if (num_items > 0) {
-				elem = new node(T, head);
+				elem = new node(value, head);
 			}
 			else {
 				//We're in the special case of an empty list
-				elem = new node(T);
+				elem = new node(value);
 				elem->next = elem;
 				elem->prev = elem;
 				head = elem;
@@ -278,15 +281,16 @@ namespace CS273 {
 			tail = elem;
 		}
 
+		///TODO
 		/// <summary>
 		/// Removes an element from the "back" of the list, causing the
 		/// previous element before it to point to the beginning.
 		/// </summary>
-		void pop_back() {
+		//void pop_back() {
 			//TODO. Right now is a stub
-		}
+		//}
 
-		//TODO: Rest of the functionality
+		//TODO: Rest of the functionality, see comments above...
 
 #pragma endregion
 #pragma region RuleOfThree
@@ -298,24 +302,26 @@ namespace CS273 {
 		virtual ~CircLinkedList<T>() {
 			//March through the list destroying the whole thing!
 			node* byebye = head;
-			while (byebye) {
+			while (num_items > 0) {
 				node* forever = byebye;
 				byebye = byebye->next;
 				delete forever;
+				num_items--;
 			}
 		}
+		///TODO
 		/// <summary>
 		/// The copy constructor makes a deep copy
 		/// </summary>
-		CircLinkedList<T>(const CircLinkedList<T>& alt) :
-			head(nullptr), tail(nullptr), num_items(0) {
-			
-			node* n = alt.head;
-			int items_copied = 0;
-			while (items_copied < alt.num_items) {
+		///CircLinkedList<T>(const CircLinkedList<T>& alt) :
+		///	head(nullptr), tail(nullptr), num_items(0) {
+		///	
+		///	node* n = alt.head;
+		///	int items_copied = 0;
+		///	while (items_copied < alt.num_items) {
 				//TODO
-			}
-		}
+		///	}
+		///}
 	};
 };
 #endif
