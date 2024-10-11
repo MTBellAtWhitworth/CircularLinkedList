@@ -8,7 +8,7 @@
 * 
 * Author: Matthew Bell and CS273
 * Co-authors: <TODO: PUT YOUR NAME HERE. YOU MAY WORK IN GROUPS OF TWO
-				IFF you come to Caleb or Prof. Bell for advice.>
+				IFF you come to Prof. Bell for advice.>
 * 
 * Miscelleneous credits:
 * This example is loosely based on an earlier doubly linked list (non-circular)
